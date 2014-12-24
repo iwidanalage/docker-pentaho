@@ -1,0 +1,3 @@
+#!/bin/bash
+cd /opt/pentaho/biserver-ce
+./start-pentaho.sh
