@@ -17,7 +17,7 @@ ENV REL 5.2.0.0-209
 CMD ["/sbin/my_init"]
 
 # Make sure package repository is up to date
-RUN apt-get install -f -y curl git zip postgresql && \
+RUN apt-get install -f -y curl git zip pwgen postgresql && \
 # Fix DB codepage from SQL-ASCII to UTF8 as required by Pentaho
     /usr/bin/pg_dropcluster --stop 9.3 main && \
     /usr/bin/pg_createcluster --start -e UTF-8 9.3 main
@@ -28,7 +28,7 @@ ADD v5/db/pg_hba.conf /etc/postgresql/9.3/main/pg_hba.conf
 RUN chown postgres:postgres /etc/postgresql/9.3/main/pg_hba.conf
 
 RUN useradd -m pentaho && \
-    #mkdir /opt/pentaho && \
+    mkdir /opt/pentaho && \
     chown pentaho:pentaho /opt/pentaho && \
     su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/5.2/biserver-ce-${REL}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
     su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
