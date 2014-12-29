@@ -54,7 +54,7 @@ ADD v5/pentaho/system/repository.xml /opt/pentaho/biserver-ce/pentaho-solutions/
 ADD v5/tomcat/context.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/META-INF/context.xml
 ADD v5/tomcat/web.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/WEB-INF/web.xml
 
-RUN chown pentaho:pentaho -Rf /opt/pentaho
+# RUN chown pentaho:pentaho -Rf /opt/pentaho
 
 # RUN mkdir /etc/my_init.d
 ADD 01_start_postgresql.sh /etc/my_init.d/01_start_postgresql.sh
