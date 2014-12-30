@@ -4,7 +4,7 @@
 # VERSION	1.0
 #
 
-FROM sramazzina/docker-base-jdk7
+FROM serasoft/docker-base-jdk7
 MAINTAINER Sergio Ramazzina, sergio.ramazzina@serasoft.it
 
 # Set correct environment variables.
