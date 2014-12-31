@@ -4,6 +4,13 @@
 # VERSION	1.0
 #
 
+# Ideal solution is to change to devmapper for storage 
+# Add the following line to /etc/docker/default
+# DOCKER_OPTS="--storage-driver=devicemapper"
+# then restart the docker service
+# see here if you have existing containers you need to backup
+# http://muehe.org/posts/switching-docker-from-aufs-to-devicemapper/
+
 FROM serasoft/docker-base-jdk7
 MAINTAINER Sergio Ramazzina, sergio.ramazzina@serasoft.it
 
@@ -16,7 +23,14 @@ ENV REL 5.2.0.0-209
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
 
-# Make sure package repository is up to date
+# =============================== Start Image Customization ===================
+
+# Added workaround for AUFS bug as documented at the following URL
+# https://github.com/docker/docker/issues/783#issuecomment-56013588
+RUN echo "mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; rm -r /etc/ssl/private; mv /etc/ssl/private-copy /etc/ssl/private; chmod -R 0700 /etc/ssl/private; chown -R postgres /etc/ssl/private" >> /etc/my_init.d/00_regen_ssh_host_keys.sh
+
+# Make sure package repository is up to date before installing postgres as Pentaho's
+# work database
 RUN apt-get install -f -y curl git zip pwgen postgresql && \
 # Fix DB codepage from SQL-ASCII to UTF8 as required by Pentaho
     /usr/bin/pg_dropcluster --stop 9.3 main && \
@@ -65,8 +79,9 @@ RUN chmod +x /etc/my_init.d/01_start_postgresql.sh && \
 ADD run /etc/service/pentaho/run
 RUN chmod +x /etc/service/pentaho/run
 
+# Expose Pentaho and PostgreSQL ports
 EXPOSE 8080 5432
 
 
 # Clean up APT when done.
-# RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
