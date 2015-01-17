@@ -16,4 +16,4 @@ To create the image execute the following command from the docker-pentaho folder
 
 To run the image and bind the exposed ports run the following command:
 
-	docker run -d -p 8080:8080 5432:5432 serasoft/docker-pentaho
+	docker run -d -p 8080:8080 -p 5432:5432 serasoft/docker-pentaho
