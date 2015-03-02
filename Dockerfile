@@ -1,7 +1,7 @@
 #
 # Serasoft's docker image for Pentaho Business Analytics
 #
-# VERSION	1.0
+# VERSION	1.1
 #
 
 # Ideal solution is to change to devmapper for storage 
