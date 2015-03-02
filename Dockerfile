@@ -18,7 +18,7 @@ MAINTAINER Sergio Ramazzina, sergio.ramazzina@serasoft.it
 ENV HOME /root
 ENV TOMCAT_HOME /opt/pentaho/biserver-ce/tomcat
 ENV PENTAHO_HOME /opt/pentaho/biserver-ce
-ENV REL 5.2.0.0-209
+ENV REL 5.3.0.0-213
 
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
