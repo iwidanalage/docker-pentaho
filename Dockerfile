@@ -18,7 +18,8 @@ MAINTAINER Sergio Ramazzina, sergio.ramazzina@serasoft.it
 ENV HOME /root
 ENV TOMCAT_HOME /opt/pentaho/biserver-ce/tomcat
 ENV PENTAHO_HOME /opt/pentaho/biserver-ce
-ENV REL 5.3.0.0-213
+ENV BASE_REL 5.3
+ENV REV 0.0-213
 
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
@@ -44,7 +45,7 @@ RUN chown postgres:postgres /etc/postgresql/9.3/main/pg_hba.conf
 RUN useradd -m pentaho && \
     mkdir /opt/pentaho && \
     chown pentaho:pentaho /opt/pentaho && \
-    su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/5.2/biserver-ce-${REL}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
+    su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
     su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
     rm /opt/pentaho/biserver-ce/promptuser.sh && \
     rm /opt/pentaho/biserver-ce.zip && \
