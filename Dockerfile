@@ -20,6 +20,7 @@ ENV TOMCAT_HOME /opt/pentaho/biserver-ce/tomcat
 ENV PENTAHO_HOME /opt/pentaho/biserver-ce
 ENV BASE_REL 5.3
 ENV REV 0.0-213
+ENV DB_TYPE postgresql
 
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
@@ -52,6 +53,23 @@ RUN useradd -m pentaho && \
     # Disable daemon mode for Tomcat
     sed -i -e 's/\(exec ".*"\) start/\1 run/' /opt/pentaho/biserver-ce/tomcat/bin/startup.sh
 
+# Change password in script files
+ADD utils/change_passwords.sh /opt/pentaho/biserver-ce/utils/change_passwords.sh 
+ADD v5/pentaho/db/${DB_TYPE}/create_jcr_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_jcr_${DB_TYPE}.sql
+ADD v5/pentaho/db/${DB_TYPE}/create_quartz_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_quartz_${DB_TYPE}.sql
+ADD v5/pentaho/db/${DB_TYPE}/create_repository_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_repository_${DB_TYPE}.sql
+
+ADD v5/pentaho/system/${DB_TYPE}/applicationContext-spring-security-hibernate.properties /opt/pentaho/biserver-ce/pentaho-solutions/system/applicationContext-spring-security-hibernate.properties
+ADD v5/pentaho/system/${DB_TYPE}/hibernate-settings.xml /opt/pentaho/biserver-ce/pentaho-solutions/system/hibernate/hibernate-settings.xml
+ADD v5/pentaho/system/${DB_TYPE}/quartz.properties /opt/pentaho/biserver-ce/pentaho-solutions/system/quartz/quartz.properties
+ADD v5/pentaho/system/${DB_TYPE}/repository.xml /opt/pentaho/biserver-ce/pentaho-solutions/system/jackrabbit/repository.xml
+
+ADD v5/tomcat/${DB_TYPE}/context.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/META-INF/context.xml
+ADD v5/tomcat/web.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/WEB-INF/web.xml
+
+# Set password to generated value
+RUN /opt/pentaho/biserver-ce/utils/change_passwords.sh
+
 # Configure Pentaho to use Postgres Instance as metadata repository for BA system
 ADD ./v5/db/dummy_quartz_table.sql /opt/pentaho/biserver-ce/data/postgresql/dummy_quartz_table.sql
 
@@ -60,14 +78,6 @@ RUN /etc/init.d/postgresql restart && \
     su postgres -c "psql -f /opt/pentaho/biserver-ce/data/postgresql/create_quartz_postgresql.sql" && \
     su postgres -c "psql -f /opt/pentaho/biserver-ce/data/postgresql/create_jcr_postgresql.sql" && \
     su postgres -c "psql quartz -f /opt/pentaho/biserver-ce/data/postgresql/dummy_quartz_table.sql"
-
-# Update pentaho configuration files to have the system to work with the selected database
-ADD v5/pentaho/system/applicationContext-spring-security-hibernate.properties /opt/pentaho/biserver-ce/pentaho-solutions/system/applicationContext-spring-security-hibernate.properties
-ADD v5/pentaho/system/hibernate-settings.xml /opt/pentaho/biserver-ce/pentaho-solutions/system/hibernate/hibernate-settings.xml
-ADD v5/pentaho/system/quartz.properties /opt/pentaho/biserver-ce/pentaho-solutions/system/quartz/quartz.properties
-ADD v5/pentaho/system/repository.xml /opt/pentaho/biserver-ce/pentaho-solutions/system/jackrabbit/repository.xml
-ADD v5/tomcat/context.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/META-INF/context.xml
-ADD v5/tomcat/web.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/WEB-INF/web.xml
 
 # RUN chown pentaho:pentaho -Rf /opt/pentaho
 
