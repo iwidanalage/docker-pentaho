@@ -38,15 +38,17 @@ RUN apt-get install -f -y curl git zip pwgen postgresql && \
     /usr/bin/pg_dropcluster --stop 9.3 main && \
     /usr/bin/pg_createcluster --start -e UTF-8 9.3 main
 
-# ADD biserver-ce-${REL}.zip /opt/pentaho/biserver-ce.zip
 # Configure Pentaho's databases
 ADD v5/db/pg_hba.conf /etc/postgresql/9.3/main/pg_hba.conf
 RUN chown postgres:postgres /etc/postgresql/9.3/main/pg_hba.conf
 
 RUN useradd -m pentaho && \
-    mkdir /opt/pentaho && \
-    chown pentaho:pentaho /opt/pentaho && \
-    su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
+    mkdir /opt/pentaho
+
+ADD biserver-ce-$BASE_REL.$REV.zip /opt/pentaho/biserver-ce.zip
+
+RUN chown -Rf pentaho:pentaho /opt/pentaho && \
+#    su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
     su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
     rm /opt/pentaho/biserver-ce/promptuser.sh && \
     rm /opt/pentaho/biserver-ce.zip && \
@@ -55,14 +57,15 @@ RUN useradd -m pentaho && \
 
 # Change password in script files
 ADD utils/change_passwords.sh /opt/pentaho/biserver-ce/utils/change_passwords.sh 
-ADD v5/pentaho/db/${DB_TYPE}/create_jcr_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_jcr_${DB_TYPE}.sql
-ADD v5/pentaho/db/${DB_TYPE}/create_quartz_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_quartz_${DB_TYPE}.sql
-ADD v5/pentaho/db/${DB_TYPE}/create_repository_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_repository_${DB_TYPE}.sql
+ADD v5/db/${DB_TYPE}/create_jcr_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_jcr_${DB_TYPE}.sql
+ADD v5/db/${DB_TYPE}/create_quartz_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_quartz_${DB_TYPE}.sql
+ADD v5/db/${DB_TYPE}/create_repository_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_repository_${DB_TYPE}.sql
 
 ADD v5/pentaho/system/${DB_TYPE}/applicationContext-spring-security-hibernate.properties /opt/pentaho/biserver-ce/pentaho-solutions/system/applicationContext-spring-security-hibernate.properties
 ADD v5/pentaho/system/${DB_TYPE}/hibernate-settings.xml /opt/pentaho/biserver-ce/pentaho-solutions/system/hibernate/hibernate-settings.xml
 ADD v5/pentaho/system/${DB_TYPE}/quartz.properties /opt/pentaho/biserver-ce/pentaho-solutions/system/quartz/quartz.properties
 ADD v5/pentaho/system/${DB_TYPE}/repository.xml /opt/pentaho/biserver-ce/pentaho-solutions/system/jackrabbit/repository.xml
+ADD v5/pentaho/system/${DB_TYPE}/postgresql.hibernate.cfg.xml /opt/pentaho/biserver-ce/pentaho-solutions/system/hibernate/postgresql.hibernate.cfg.xml
 
 ADD v5/tomcat/${DB_TYPE}/context.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/META-INF/context.xml
 ADD v5/tomcat/web.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/WEB-INF/web.xml

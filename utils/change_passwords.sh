@@ -11,10 +11,12 @@ fi
 PASS=${DB_USERS_PASS:-$(pwgen -s 12 1)}
 echo "=> Modifying jcr_user, hibusr and pentaho_usr passwords to ${PASS}"
 
-sed -i 's/@@DB_PWD@@/${PASS}/g' `find . -name /opt/pentaho/biserver-ce/data/${DB_TYPE}/*.sql`
-sed -i 's/@@DB_PWD@@/${PASS}/g' `find . -name /opt/pentaho/biserver-ce/system/*.properties`
-sed -i 's/@@DB_PWD@@/${PASS}/g' `find . -name /opt/pentaho/biserver-ce/system/*.xml`
-sed -i 's/@@DB_PWD@@/${PASS}/g' `find . -name /opt/pentaho/biserver-ce/tomcat/webapps/*.xml`
+cd /opt/pentaho/biserver-ce
+
+sed -i 's/@@DB_PWD@@/'${PASS}'/g' `find ./data/${DB_TYPE} -name *.sql`
+sed -i 's/@@DB_PWD@@/'${PASS}'/g' `find ./pentaho-solutions/system -name *.properties`
+sed -i 's/@@DB_PWD@@/'${PASS}'/g' `find ./pentaho-solutions/system -name *.xml`
+sed -i 's/@@DB_PWD@@/'${PASS}'/g' `find ./tomcat/webapps -name *.xml`
 
 echo "Pentaho BA Server database users' passwords changed successfully!"
 touch /.pentaho_dbpwd_changed   
