@@ -45,10 +45,10 @@ RUN chown postgres:postgres /etc/postgresql/9.3/main/pg_hba.conf
 RUN useradd -m pentaho && \
     mkdir /opt/pentaho
 
-ADD biserver-ce-$BASE_REL.$REV.zip /opt/pentaho/biserver-ce.zip
+# ADD biserver-ce-$BASE_REL.$REV.zip /opt/pentaho/biserver-ce.zip
 
 RUN chown -Rf pentaho:pentaho /opt/pentaho && \
-#    su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
+su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
     su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
     rm /opt/pentaho/biserver-ce/promptuser.sh && \
     rm /opt/pentaho/biserver-ce.zip && \
@@ -95,7 +95,6 @@ RUN chmod +x /etc/service/pentaho/run
 
 # Expose Pentaho and PostgreSQL ports
 EXPOSE 8080 5432
-
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
