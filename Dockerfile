@@ -18,8 +18,8 @@ MAINTAINER Sergio Ramazzina, sergio.ramazzina@serasoft.it
 ENV HOME /root
 ENV TOMCAT_HOME /opt/pentaho/biserver-ce/tomcat
 ENV PENTAHO_HOME /opt/pentaho/biserver-ce
-ENV BASE_REL 5.3
-ENV REV 0.0-213
+ENV BASE_REL 5.4
+ENV REV 0.0-128
 ENV DB_TYPE postgresql
 
 # Use baseimage-docker's init system.
