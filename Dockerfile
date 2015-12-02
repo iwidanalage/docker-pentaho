@@ -11,15 +11,15 @@
 # see here if you have existing containers you need to backup
 # http://muehe.org/posts/switching-docker-from-aufs-to-devicemapper/
 
-FROM serasoft/docker-base-jdk7
+FROM serasoft/docker-jdk:jdk7
 MAINTAINER Sergio Ramazzina, sergio.ramazzina@serasoft.it
 
 # Set correct environment variables.
 ENV HOME /root
 ENV TOMCAT_HOME /opt/pentaho/biserver-ce/tomcat
 ENV PENTAHO_HOME /opt/pentaho/biserver-ce
-ENV BASE_REL 5.4
-ENV REV 0.1-130
+ENV BASE_REL 6.0
+ENV REV 0.0-353
 ENV DB_TYPE postgresql
 
 # Use baseimage-docker's init system.
