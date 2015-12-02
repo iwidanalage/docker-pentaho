@@ -19,7 +19,7 @@ ENV HOME /root
 ENV TOMCAT_HOME /opt/pentaho/biserver-ce/tomcat
 ENV PENTAHO_HOME /opt/pentaho/biserver-ce
 ENV BASE_REL 5.4
-ENV REV 0.0-128
+ENV REV 0.1-130
 ENV DB_TYPE postgresql
 
 # Use baseimage-docker's init system.
