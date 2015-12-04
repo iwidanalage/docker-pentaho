@@ -11,13 +11,14 @@
 # see here if you have existing containers you need to backup
 # http://muehe.org/posts/switching-docker-from-aufs-to-devicemapper/
 
-FROM serasoft/docker-jdk:jdk7
+FROM serasoft/docker-jdk:jdk8
 MAINTAINER Sergio Ramazzina, sergio.ramazzina@serasoft.it
 
 # Set correct environment variables.
 ENV HOME /root
 ENV TOMCAT_HOME /opt/pentaho/biserver-ce/tomcat
 ENV PENTAHO_HOME /opt/pentaho/biserver-ce
+ENV PLUGIN_SET marketplace,cdf,cda,cde,cgg
 ENV BASE_REL 6.0
 ENV REV 0.0-353
 ENV DB_TYPE postgresql
@@ -33,7 +34,7 @@ RUN echo "mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-co
 
 # Make sure package repository is up to date before installing postgres as Pentaho's
 # work database
-RUN apt-get install -f -y curl git zip pwgen postgresql && \
+RUN apt-get install -f -y wget curl git zip pwgen postgresql && \
 # Fix DB codepage from SQL-ASCII to UTF8 as required by Pentaho
     /usr/bin/pg_dropcluster --stop 9.3 main && \
     /usr/bin/pg_createcluster --start -e UTF-8 9.3 main
@@ -45,16 +46,24 @@ RUN chown postgres:postgres /etc/postgresql/9.3/main/pg_hba.conf
 RUN useradd -m pentaho && \
     mkdir /opt/pentaho
 
-# ADD biserver-ce-$BASE_REL.$REV.zip /opt/pentaho/biserver-ce.zip
+ADD biserver-ce-$BASE_REL.$REV.zip /opt/pentaho/biserver-ce.zip
 
 RUN chown -Rf pentaho:pentaho /opt/pentaho && \
-su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
+#su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
     su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
     rm /opt/pentaho/biserver-ce/promptuser.sh && \
     rm /opt/pentaho/biserver-ce.zip && \
     # Disable daemon mode for Tomcat
     sed -i -e 's/\(exec ".*"\) start/\1 run/' /opt/pentaho/biserver-ce/tomcat/bin/startup.sh
+# Remove unnecessary plugins
+RUN rm -Rf /opt/pentaho/biserver-ce/pentaho-solutions/system/pentaho-jpivot-plugin /opt/pentaho/biserver-ce/pentaho-solutions/system/marketplace
 
+# Install CTools and update major plugins
+RUN wget --no-check-certificate 'https://raw.githubusercontent.com/sramazzina/ctools-installer/master/ctools-installer.sh' -P / -o /dev/null && \
+    chmod +x ctools-installer.sh && \
+    ./ctools-installer.sh -s ${PENTAHO_HOME}/pentaho-solutions -y -c ${PLUGIN_SET}
+
+ 
 # Change password in script files
 ADD utils/change_passwords.sh /opt/pentaho/biserver-ce/utils/change_passwords.sh 
 ADD v5/db/${DB_TYPE}/create_jcr_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_jcr_${DB_TYPE}.sql
