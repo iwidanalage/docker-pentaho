@@ -20,7 +20,7 @@ ENV TOMCAT_HOME /opt/pentaho/biserver-ce/tomcat
 ENV PENTAHO_HOME /opt/pentaho/biserver-ce
 ENV PLUGIN_SET marketplace,cdf,cda,cde,cgg
 ENV BASE_REL 6.0
-ENV REV 0.0-353
+ENV REV 1.0-386
 ENV DB_TYPE postgresql
 
 # Use baseimage-docker's init system.
