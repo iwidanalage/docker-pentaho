@@ -30,26 +30,21 @@ RUN echo deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main >> /etc/a
     apt-get install -f -y wget curl git zip pwgen postgresql-9.4
 
 
-# Fix DB codepage from SQL-ASCII to UTF8 as required by Pentaho
-#RUN  /usr/bin/pg_dropcluster --stop 9.4 main && \
-#    /usr/bin/pg_createcluster --start -e UTF-8 9.4 main
-
 # Configure postgresql to run with locally installed pentaho instance
 ADD v5/db/pg_hba.conf /etc/postgresql/9.4/main/pg_hba.conf
 RUN chown postgres:postgres /etc/postgresql/9.4/main/pg_hba.conf
-#    /etc/init.d/postgresql restart
 
 RUN useradd -m -d ${PENTAHO_HOME} pentaho
 
-ADD biserver-ce-$BASE_REL.$REV.zip ${PENTAHO_HOME}/biserver-ce.zip
+#ADD biserver-ce-$BASE_REL.$REV.zip ${PENTAHO_HOME}/biserver-ce.zip
 
-# RUN chown -Rf pentaho:pentaho ${PENTAHO_HOME} && \
-#RUN  su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
-RUN    su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
+RUN  su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
+    su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
     rm /opt/pentaho/biserver-ce/promptuser.sh && \
     rm /opt/pentaho/biserver-ce.zip && \
     # Disable daemon mode for Tomcat so that docker logs works properly
     sed -i -e 's/\(exec ".*"\) start/\1 run/' /opt/pentaho/biserver-ce/tomcat/bin/startup.sh
+
 # Remove unnecessary/broken plugins
 RUN rm -Rf /opt/pentaho/biserver-ce/pentaho-solutions/system/pentaho-jpivot-plugin /opt/pentaho/biserver-ce/pentaho-solutions/system/marketplace
 
@@ -58,11 +53,12 @@ RUN wget --no-check-certificate 'https://raw.githubusercontent.com/sramazzina/ct
     chmod +x ctools-installer.sh && \
     ./ctools-installer.sh -s ${PENTAHO_HOME}/biserver-ce/pentaho-solutions -y -c ${PLUGIN_SET}
  
-# Change password in script files
+# Add all files needed t properly initialize the container
 COPY utils ${PENTAHO_HOME}/biserver-ce/utils 
 ADD v5/db/${DB_TYPE}/create_jcr_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_jcr_${DB_TYPE}.sql
 ADD v5/db/${DB_TYPE}/create_quartz_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_quartz_${DB_TYPE}.sql
 ADD v5/db/${DB_TYPE}/create_repository_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_repository_${DB_TYPE}.sql
+ADD ./v5/db/dummy_quartz_table.sql /opt/pentaho/biserver-ce/data/postgresql/dummy_quartz_table.sql
 
 ADD v5/pentaho/system/${DB_TYPE}/applicationContext-spring-security-hibernate.properties /opt/pentaho/biserver-ce/pentaho-solutions/system/applicationContext-spring-security-hibernate.properties
 ADD v5/pentaho/system/${DB_TYPE}/hibernate-settings.xml /opt/pentaho/biserver-ce/pentaho-solutions/system/hibernate/hibernate-settings.xml
@@ -74,27 +70,19 @@ ADD v5/tomcat/${DB_TYPE}/context.xml /opt/pentaho/biserver-ce/tomcat/webapps/pen
 ADD v5/tomcat/web.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/WEB-INF/web.xml
 
 # Set password to generated value
-RUN chown -Rf pentaho:pentaho ${PENTAHO_HOME}/biserver-ce && \
-        ${PENTAHO_HOME}/biserver-ce/utils/change_passwords.sh
-
-# Configure Pentaho to use Postgres Instance as metadata repository for BA system
-ADD ./v5/db/dummy_quartz_table.sql /opt/pentaho/biserver-ce/data/postgresql/dummy_quartz_table.sql
+RUN chown -Rf pentaho:pentaho ${PENTAHO_HOME}/biserver-ce
 
 # Added workaround for AUFS bug as documented at the following URL
 # https://github.com/docker/docker/issues/783#issuecomment-56013588
 RUN mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; rm -r /etc/ssl/private; mv /etc/ssl/private-copy /etc/ssl/private; chmod -R 0700 /etc/ssl/private; chown -R postgres /etc/ssl/private
 
-RUN chown pentaho:pentaho -Rf /opt/pentaho
-
-#RUN mkdir /etc/my_init.d
 ADD 01_start_postgresql.sh /etc/my_init.d/01_start_postgresql.sh
 ADD 02_init_container.sh /etc/my_init.d/02_init_container.sh
+ADD run /etc/service/pentaho/run
 
 RUN chmod +x /etc/my_init.d/*.sh && \ 
-     mkdir /etc/service/pentaho
-
-ADD run /etc/service/pentaho/run
-RUN chmod +x /etc/service/pentaho/run
+    mkdir /etc/service/pentaho && \
+    chmod +x /etc/service/pentaho/run
 
 # Expose Pentaho and PostgreSQL ports
 EXPOSE 8080 5432

@@ -1,3 +1,3 @@
 #!/bin/bash
 cd /opt/pentaho/biserver-ce
-./start-pentaho.sh
+sudo -H -u pentaho ./start-pentaho.sh
