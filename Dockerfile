@@ -81,7 +81,6 @@ ADD 02_init_container.sh /etc/my_init.d/02_init_container.sh
 ADD run /etc/service/pentaho/run
 
 RUN chmod +x /etc/my_init.d/*.sh && \ 
-    mkdir /etc/service/pentaho && \
     chmod +x /etc/service/pentaho/run
 
 # Expose Pentaho and PostgreSQL ports
