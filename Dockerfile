@@ -20,6 +20,7 @@ ENV DB_TYPE postgresql
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
 
+
 # =============================== Start Image Customization ===================
 # Make sure base image is updatet then install needed linux tools
 # Install latest postgresql version as pentaho metadata repository
@@ -29,6 +30,12 @@ RUN echo deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main >> /etc/a
     apt-get upgrade && \
     apt-get install -f -y wget curl git zip pwgen postgresql-9.4
 
+# Workaround for bug
+# https://github.com/helmi03/docker-postgis/issues/10
+# https://github.com/docker/docker/issues/783
+RUN mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; rm -r /etc/ssl/private; mv /etc/ssl/private-copy /etc/ssl/private; chmod -R 0700 /etc/ssl/private; chown -R postgres /etc/ssl/private
+
+
 
 # Configure postgresql to run with locally installed pentaho instance
 ADD v5/db/pg_hba.conf /etc/postgresql/9.4/main/pg_hba.conf
@@ -36,10 +43,10 @@ RUN chown postgres:postgres /etc/postgresql/9.4/main/pg_hba.conf
 
 RUN useradd -m -d ${PENTAHO_HOME} pentaho
 
-#ADD biserver-ce-$BASE_REL.$REV.zip ${PENTAHO_HOME}/biserver-ce.zip
+ADD biserver-ce-$BASE_REL.$REV.zip ${PENTAHO_HOME}/biserver-ce.zip
 
-RUN  su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
-    su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
+#RUN  su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
+RUN    su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
     rm /opt/pentaho/biserver-ce/promptuser.sh && \
     rm /opt/pentaho/biserver-ce.zip && \
     # Disable daemon mode for Tomcat so that docker logs works properly
@@ -71,11 +78,6 @@ ADD v5/tomcat/web.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/WEB-INF/we
 
 # Set password to generated value
 RUN chown -Rf pentaho:pentaho ${PENTAHO_HOME}/biserver-ce
-
-# Added workaround for AUFS bug as documented at the following URL
-# https://github.com/docker/docker/issues/783#issuecomment-56013588
-RUN mkdir /etc/ssl/private-copy; mv /etc/ssl/private/* /etc/ssl/private-copy/; rm -r /etc/ssl/private; mv /etc/ssl/private-copy /etc/ssl/private; chmod -R 0700 /etc/ssl/private; chown -R postgres /etc/ssl/private
-
 ADD 01_start_postgresql.sh /etc/my_init.d/01_start_postgresql.sh
 ADD 02_init_container.sh /etc/my_init.d/02_init_container.sh
 ADD run /etc/service/pentaho/run
