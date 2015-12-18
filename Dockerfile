@@ -43,10 +43,10 @@ RUN chown postgres:postgres /etc/postgresql/9.4/main/pg_hba.conf
 
 RUN useradd -m -d ${PENTAHO_HOME} pentaho
 
-ADD biserver-ce-$BASE_REL.$REV.zip ${PENTAHO_HOME}/biserver-ce.zip
+#ADD biserver-ce-$BASE_REL.$REV.zip ${PENTAHO_HOME}/biserver-ce.zip
 
-#RUN  su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
-RUN    su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
+RUN  su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
+    su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
     rm /opt/pentaho/biserver-ce/promptuser.sh && \
     rm /opt/pentaho/biserver-ce.zip && \
     # Disable daemon mode for Tomcat so that docker logs works properly
