@@ -29,14 +29,18 @@ sed -i 's/@@DB_HOST@@/'${DB_HOST}'/g' `find ./data/${DB_TYPE} -name *.sql`
 sed -i 's/@@DB_HOST@@/'${DB_HOST}'/g' `find ./pentaho-solutions/system -name *.properties`
 sed -i 's/@@DB_HOST@@/'${DB_HOST}'/g' `find ./pentaho-solutions/system -name *.xml`
 sed -i 's/@@DB_HOST@@/'${DB_HOST}'/g' `find ./tomcat/webapps -name *.xml`
+sed -i 's/@@DB_HOST@@/'${DB_HOST}'/g' `find ./utils -name init_pentaho_db.sh`
+
 
 DB_PORT=${PENTAHO_DB_PORT_5432_TCP_PORT:-5432}
-echo "=> Modifying database port to ${DB_HOST}"
+echo "=> Modifying database port to ${DB_PORT}"
 
-sed -i 's/@@DB_HOST@@/'${DB_HOST}'/g' `find ./data/${DB_TYPE} -name *.sql`
+sed -i 's/@@DB_PORT@@/'${DB_PORT}'/g' `find ./data/${DB_TYPE} -name *.sql`
 sed -i 's/@@DB_PORT@@/'${DB_PORT}'/g' `find ./pentaho-solutions/system -name *.properties`
 sed -i 's/@@DB_PORT@@/'${DB_PORT}'/g' `find ./pentaho-solutions/system -name *.xml`
 sed -i 's/@@DB_PORT@@/'${DB_PORT}'/g' `find ./tomcat/webapps -name *.xml`
+sed -i 's/@@DB_PORT@@/'${DB_PORT}'/g' `find ./utils -name init_pentaho_db.sh`
+
 
 echo "Pentaho BA Server containerized installation templates processed successfully!"
 touch /.all_templates_processed   

@@ -42,10 +42,10 @@ RUN chown postgres:postgres /etc/postgresql/9.4/main/pg_hba.conf
 
 RUN useradd -m -d ${PENTAHO_HOME} pentaho
 
-#ADD biserver-ce-$BASE_REL.$REV.zip ${PENTAHO_HOME}/biserver-ce.zip
+ADD biserver-ce-$BASE_REL.$REV.zip ${PENTAHO_HOME}/biserver-ce.zip
 
-RUN  su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
-    su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
+#RUN  su -c "curl -L http://sourceforge.net/projects/pentaho/files/Business%20Intelligence%20Server/${BASE_REL}/biserver-ce-${BASE_REL}.${REV}.zip/download -o /opt/pentaho/biserver-ce.zip" pentaho && \
+RUN    su -c "unzip -q /opt/pentaho/biserver-ce.zip -d /opt/pentaho/" pentaho && \
     rm /opt/pentaho/biserver-ce/promptuser.sh && \
     rm /opt/pentaho/biserver-ce.zip && \
     # Disable daemon mode for Tomcat so that docker logs works properly
@@ -77,8 +77,10 @@ ADD v5/tomcat/web.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/WEB-INF/we
 
 # Set password to generated value
 RUN chown -Rf pentaho:pentaho ${PENTAHO_HOME}/biserver-ce
-ADD 01_start_postgresql.sh /etc/my_init.d/02_start_postgresql.sh
-ADD 02_init_container.sh /etc/my_init.d/01_init_container.sh
+ADD 02_start_postgresql.sh /etc/my_init.d/02_start_postgresql.sh
+ADD 01_init_container.sh /etc/my_init.d/01_init_container.sh
+ADD 03_init_pentaho_tables.sh /etc/my_init.d/03_init_pentaho_tables.sh
+
 ADD run /etc/service/pentaho/run
 
 RUN chmod +x /etc/my_init.d/*.sh && \ 

@@ -1,4 +1,4 @@
 #!/bin/bash
 
-${PENTAHO_HOME}/biserver-ce/utils/change_passwords.sh
+${PENTAHO_HOME}/biserver-ce/utils/instantiate_templates.sh
 
