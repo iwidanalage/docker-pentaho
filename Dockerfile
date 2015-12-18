@@ -77,8 +77,8 @@ ADD v5/tomcat/web.xml /opt/pentaho/biserver-ce/tomcat/webapps/pentaho/WEB-INF/we
 
 # Set password to generated value
 RUN chown -Rf pentaho:pentaho ${PENTAHO_HOME}/biserver-ce
-ADD 01_start_postgresql.sh /etc/my_init.d/01_start_postgresql.sh
-ADD 02_init_container.sh /etc/my_init.d/02_init_container.sh
+ADD 01_start_postgresql.sh /etc/my_init.d/02_start_postgresql.sh
+ADD 02_init_container.sh /etc/my_init.d/01_init_container.sh
 ADD run /etc/service/pentaho/run
 
 RUN chmod +x /etc/my_init.d/*.sh && \ 
