@@ -24,10 +24,10 @@ CMD ["/sbin/my_init"]
 # =============================== Start Image Customization ===================
 # Make sure base image is updatet then install needed linux tools
 # Install latest postgresql version as pentaho metadata repository
-RUN echo deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main >> /etc/apt/sources.list.d/pgdg.list && \ 
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \ 
+RUN echo deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main >> /etc/apt/sources.list.d/pgdg.list && \
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
     apt-get update && \
-    apt-get upgrade && \
+    apt-get upgrade -f -y && \
     apt-get install -f -y wget curl git zip pwgen postgresql-9.4
 
 # Workaround for bug
@@ -58,9 +58,9 @@ RUN rm -Rf /opt/pentaho/biserver-ce/pentaho-solutions/system/pentaho-jpivot-plug
 RUN wget --no-check-certificate 'https://raw.githubusercontent.com/sramazzina/ctools-installer/master/ctools-installer.sh' -P / -o /dev/null && \
     chmod +x ctools-installer.sh && \
     ./ctools-installer.sh -s ${PENTAHO_HOME}/biserver-ce/pentaho-solutions -y -c ${PLUGIN_SET}
- 
+
 # Add all files needed t properly initialize the container
-COPY utils ${PENTAHO_HOME}/biserver-ce/utils 
+COPY utils ${PENTAHO_HOME}/biserver-ce/utils
 ADD v5/db/${DB_TYPE}/create_jcr_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_jcr_${DB_TYPE}.sql
 ADD v5/db/${DB_TYPE}/create_quartz_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_quartz_${DB_TYPE}.sql
 ADD v5/db/${DB_TYPE}/create_repository_${DB_TYPE}.sql /opt/pentaho/biserver-ce/data/${DB_TYPE}/create_repository_${DB_TYPE}.sql
@@ -83,7 +83,7 @@ ADD 03_init_pentaho_tables.sh /etc/my_init.d/03_init_pentaho_tables.sh
 
 ADD run /etc/service/pentaho/run
 
-RUN chmod +x /etc/my_init.d/*.sh && \ 
+RUN chmod +x /etc/my_init.d/*.sh && \
     chmod +x /etc/service/pentaho/run
 
 # Expose Pentaho and PostgreSQL ports
