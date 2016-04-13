@@ -12,8 +12,8 @@ ENV HOME /root
 ENV PENTAHO_HOME /opt/pentaho
 ENV TOMCAT_HOME ${PENTAHO_HOME}/biserver-ce/tomcat
 ENV PLUGIN_SET marketplace,cdf,cda,cde,cgg
-ENV BASE_REL 6.0
-ENV REV 1.0-386
+ENV BASE_REL 6.1
+ENV REV 0.1-196
 # Set default metadata DB to postgresql
 ENV DB_TYPE postgresql
 
